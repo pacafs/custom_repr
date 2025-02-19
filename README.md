@@ -13,7 +13,8 @@ pip install custom-repr
 ```python
 from custom_repr import add_repr
 
-@add_repr  # Add this decorator to every class you want to use the custom_repr format
+# Apply this decorator to automatically enhance your class with a custom __repr__ method, providing a better representation of object.
+@add_repr  
 class Person:
     def __init__(self, name, age):
         self.name = name

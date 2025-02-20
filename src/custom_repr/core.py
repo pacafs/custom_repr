@@ -1,6 +1,3 @@
-# Save the original __new__ method
-original_new = type
-
 def add_repr(cls):
     """Decorator to add custom representation to a specific class."""
     def custom_repr(self):
@@ -20,5 +17,3 @@ def add_repr(cls):
     if '__repr__' not in cls.__dict__:
         cls.__repr__ = custom_repr
     return cls
-
-

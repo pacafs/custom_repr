@@ -1,6 +1,6 @@
 [project]
 name = "custom-repr"
-version = "0.2.0"
+version = "0.2.1"
 description = "A simple decorator for customizing Python object representations"
 authors = [
     { name = "Pedro Fernandes da Silva", email = "paca.fs@gmail.com" }

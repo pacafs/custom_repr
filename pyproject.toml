@@ -1,7 +1,7 @@
 [project]
 name = "custom-repr"
-version = "0.2.1"
-description = "A simple decorator for customizing Python object representations"
+version = "0.2.2"
+description = "A very lightweight Python decorator to automatically add a clean and readable __repr__ representation to your classes."
 authors = [
     { name = "Pedro Fernandes da Silva", email = "paca.fs@gmail.com" }
 ]

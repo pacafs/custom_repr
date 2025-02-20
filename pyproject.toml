@@ -1,7 +1,7 @@
 [project]
 name = "custom-repr"
-version = "0.2.2"
-description = "A very lightweight Python decorator to automatically add a clean and readable __repr__ representation to your classes."
+version = "0.2.3"
+description = "A lightweight Python library to automatically generate clean __repr__ methods for all your classes. Zero setup, zero overhead."
 authors = [
     { name = "Pedro Fernandes da Silva", email = "paca.fs@gmail.com" }
 ]

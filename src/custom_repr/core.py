@@ -20,7 +20,6 @@
 # main.py
 import builtins
 import sys
-#import os
 
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__

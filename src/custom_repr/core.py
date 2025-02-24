@@ -19,6 +19,8 @@
 #     return cls
 # main.py
 import builtins
+import sys
+#import os
 
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
@@ -45,9 +47,33 @@ class CustomMeta(type):
             dct['__repr__'] = custom_repr
         return super().__new__(cls, name, bases, dct)
 
+def is_user_module(module_name, module_file):
+    """Check if the module is a user-created module."""
+    if not module_file:  # Built-in modules don't have a file
+        return False
+        
+    # Get the virtual environment path if it exists
+    venv_path = sys.prefix
+
+    # Check if the module is from standard library or site-packages
+    is_stdlib = module_file.startswith(sys.prefix) or module_file.startswith(sys.base_prefix)
+    is_site_packages = 'site-packages' in module_file or 'dist-packages' in module_file
+    
+    return not (is_stdlib or is_site_packages)
+
 # Define a custom __build_class__ function
 def custom_build_class(func, name, *args, **kwargs):
-    return original_build_class(func, name, *args, metaclass=CustomMeta, **kwargs)
+    # Get the calling frame
+    frame = sys._getframe(1)
+    module_name = frame.f_globals.get('__name__', '')
+    module_file = frame.f_globals.get('__file__', '')
+
+    # Only apply custom metaclass to user modules
+    if is_user_module(module_name, module_file):
+        if 'metaclass' not in kwargs:
+            kwargs['metaclass'] = CustomMeta
+    
+    return original_build_class(func, name, *args, **kwargs)
 
 # Monkey-patch __build_class__
 builtins.__build_class__ = custom_build_class

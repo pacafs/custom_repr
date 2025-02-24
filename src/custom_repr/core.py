@@ -6,6 +6,7 @@ original_build_class = builtins.__build_class__
 # Define the custom repr function
 def custom_repr(self):
     """Custom representation for all classes."""
+    # Get attributes
     attribute_list = []
     for key, value in self.__dict__.items():
         if isinstance(value, str):
@@ -14,8 +15,22 @@ def custom_repr(self):
             formatted_value = repr(value)
         attribute_string = f"{key}: {formatted_value}"
         attribute_list.append(attribute_string)
-    attributes_string = ", ".join(attribute_list)
-    result = f"{self.__class__.__name__}({attributes_string})"
+    
+    # Get methods
+    method_list = []
+    for key, value in type(self).__dict__.items():
+        if callable(value) and not key.startswith('__'):
+            method_string = f"{key}()"
+            method_list.append(method_string)
+    
+    # Combine attributes and methods
+    parts = []
+    if attribute_list:
+        parts.append("{ " + ", ".join(attribute_list) + " }")
+    if method_list:
+        parts.append(" || " + ", ".join(method_list))
+    
+    result = f"{self.__class__.__name__} => {''.join(parts)}"
     return result
 
 # Define a custom metaclass

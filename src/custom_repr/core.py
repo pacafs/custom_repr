@@ -77,9 +77,13 @@ def custom_repr(self):
     output.append(arrow)
     output.append("{ ")
     output.append(Text.join(Text(", "), attribute_list))
-    output.append(" } || [ ")
-    output.append(Text.join(Text(", "), method_list))
-    output.append(" ]")
+    output.append(" }")
+    
+    # Only append methods if there are any
+    if method_list:
+        output.append(" || [ ")
+        output.append(Text.join(Text(", "), method_list))
+        output.append(" ]")
     
     # Capture and return the colored output
     with console.capture() as capture:

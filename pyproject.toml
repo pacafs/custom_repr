@@ -1,6 +1,6 @@
 [project]
 name = "custom-repr"
-version = "1.2.0"
+version = "1.2.1"
 description = "A lightweight Python library to automatically generate clean __repr__ methods for all your user-declared classes."
 authors = [
     { name = "Pedro Fernandes da Silva", email = "paca.fs@gmail.com" }
@@ -13,6 +13,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "rich>=10.0"
 ]
 
 [build-system]

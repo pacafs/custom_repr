@@ -84,7 +84,7 @@ def custom_repr(self):
     # Capture and return the colored output
     with console.capture() as capture:
         console.print(output)
-    return capture.get()
+    return capture.get().rstrip() # Remove any trailing whitespace/newline
 
  # Define a custom metaclass
 class CustomMeta(type):

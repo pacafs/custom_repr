@@ -1,26 +1,5 @@
-# def add_repr(cls):
-#     """Decorator to add custom representation to a specific class."""
-#     def custom_repr(self):
-#         attribute_list = []
-#         for key, value in self.__dict__.items():
-#             if isinstance(value, str):
-#                 formatted_value = f'"{value}"'
-#             else:
-#                 formatted_value = repr(value)
-#             attribute_string = f"{key}: {formatted_value}"
-#             attribute_list.append(attribute_string)
-#         attributes_string = ", ".join(attribute_list)
-#         result = f"{self.__class__.__name__}({attributes_string})"
-#         return result
-    
-#     # Only set __repr__ if it hasn't been explicitly defined
-#     if '__repr__' not in cls.__dict__:
-#         cls.__repr__ = custom_repr
-#     return cls
-# main.py
 import builtins
 import sys
-
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
 
@@ -62,6 +41,10 @@ def is_user_module(module_name, module_file):
 
 # Define a custom __build_class__ function
 def custom_build_class(func, name, *args, **kwargs):
+    # If metaclass is specified anywhere, use original build
+    if 'metaclass' in kwargs or (args and any(type(base) is not type for base in args)):
+        return original_build_class(func, name, *args, **kwargs)
+    
     # Get the calling frame
     frame = sys._getframe(1)
     module_name = frame.f_globals.get('__name__', '')
@@ -69,8 +52,7 @@ def custom_build_class(func, name, *args, **kwargs):
 
     # Only apply custom metaclass to user modules
     if is_user_module(module_name, module_file):
-        if 'metaclass' not in kwargs:
-            kwargs['metaclass'] = CustomMeta
+        kwargs['metaclass'] = CustomMeta
     
     return original_build_class(func, name, *args, **kwargs)
 

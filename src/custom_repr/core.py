@@ -6,7 +6,7 @@ from rich.console import Console
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
 
-## PYPI VERSION ##
+## 1st VERSION ##
 # Define the custom repr function
 # def custom_repr(self):
 #     """Custom representation for all classes."""
@@ -36,7 +36,7 @@ original_build_class = builtins.__build_class__
     
 #     result = f"{self.__class__.__name__} => {''.join(parts)}"
 #     return result
-## PYPI VERSION ##
+## 1st VERSION ##
 
 
 def custom_repr(self):

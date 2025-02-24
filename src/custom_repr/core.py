@@ -1,40 +1,90 @@
-import builtins
 import sys
+import builtins
+from rich.text import Text
+from rich.console import Console
 
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
 
 ## PYPI VERSION ##
 # Define the custom repr function
+# def custom_repr(self):
+#     """Custom representation for all classes."""
+#     # Get attributes
+#     attribute_list = []
+#     for key, value in self.__dict__.items():
+#         if isinstance(value, str):
+#             formatted_value = f'"{value}"'
+#         else:
+#             formatted_value = repr(value)
+#         attribute_string = f"{key}: {formatted_value}"
+#         attribute_list.append(attribute_string)
+    
+#     # Get methods
+#     method_list = []
+#     for key, value in type(self).__dict__.items():
+#         if callable(value) and not key.startswith('__'):
+#             method_string = f"{key}()"
+#             method_list.append(method_string)
+    
+#     # Combine attributes and methods
+#     parts = []
+#     if attribute_list:
+#         parts.append("{ " + ", ".join(attribute_list) + " }")
+#     if method_list:
+#         parts.append(" || [ " + ", ".join(method_list) + " ]")
+    
+#     result = f"{self.__class__.__name__} => {''.join(parts)}"
+#     return result
+## PYPI VERSION ##
+
+
 def custom_repr(self):
     """Custom representation for all classes."""
-    # Get attributes
+    console = Console()
+    
+    # Get attributes with colors
     attribute_list = []
     for key, value in self.__dict__.items():
         if isinstance(value, str):
-            formatted_value = f'"{value}"'
+            formatted_value = Text(f'"{value}"', style="green")  # strings in green
+        elif isinstance(value, bool):
+            formatted_value = Text(str(value), style="cyan")  # booleans in red
+        elif isinstance(value, (int, float)):
+            formatted_value = Text(str(value), style="magenta")  # numbers in yellow
         else:
-            formatted_value = repr(value)
-        attribute_string = f"{key}: {formatted_value}"
+            formatted_value = Text(repr(value), style="white")
+        
+        key_text = Text(key, style="yellow")  # keys in cyan
+        colon_text = Text(": ", style="white")
+        attribute_string = Text.assemble(key_text, colon_text, formatted_value)
         attribute_list.append(attribute_string)
     
     # Get methods
     method_list = []
     for key, value in type(self).__dict__.items():
         if callable(value) and not key.startswith('__'):
-            method_string = f"{key}()"
-            method_list.append(method_string)
+            method_text = Text(f"{key}()", style="magenta")  # methods in magenta
+            method_list.append(method_text)
     
-    # Combine attributes and methods
-    parts = []
-    if attribute_list:
-        parts.append("{ " + ", ".join(attribute_list) + " }")
-    if method_list:
-        parts.append("\n Methods: [ " + ", ".join(method_list) + " ]")
+    # Combine parts with colors
+    class_name = Text(self.__class__.__name__, style="bold blue")
+    arrow = Text(" => ", style="white")
     
-    result = f"{self.__class__.__name__} => {''.join(parts)}"
-    return result
-## PYPI VERSION ##
+    # Build the output
+    output = Text()
+    output.append(class_name)
+    output.append(arrow)
+    output.append("{ ")
+    output.append(Text.join(Text(", "), attribute_list))
+    output.append(" } || [ ")
+    output.append(Text.join(Text(", "), method_list))
+    output.append(" ]")
+    
+    # Capture and return the colored output
+    with console.capture() as capture:
+        console.print(output)
+    return capture.get()
 
  # Define a custom metaclass
 class CustomMeta(type):

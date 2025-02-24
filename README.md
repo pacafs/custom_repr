@@ -1,6 +1,6 @@
 # Custom Repr
 
-A simple decorator to add pretty representation to Python classes.
+A lightweight Python library to automatically generate clean __repr__ methods for all your user-declared classes.
 
 ## Installation
 

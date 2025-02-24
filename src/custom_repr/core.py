@@ -1,8 +1,10 @@
 import builtins
 import sys
+
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
 
+## PYPI VERSION ##
 # Define the custom repr function
 def custom_repr(self):
     """Custom representation for all classes."""
@@ -28,12 +30,13 @@ def custom_repr(self):
     if attribute_list:
         parts.append("{ " + ", ".join(attribute_list) + " }")
     if method_list:
-        parts.append(" || " + ", ".join(method_list))
+        parts.append("\n Methods: [ " + ", ".join(method_list) + " ]")
     
     result = f"{self.__class__.__name__} => {''.join(parts)}"
     return result
+## PYPI VERSION ##
 
-# Define a custom metaclass
+ # Define a custom metaclass
 class CustomMeta(type):
     def __new__(cls, name, bases, dct):
         if '__repr__' not in dct:

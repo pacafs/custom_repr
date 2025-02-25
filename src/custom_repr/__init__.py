@@ -8,4 +8,4 @@ builtins.__build_class__ = custom_build_class
 # Optional: Export any public APIs or symbols
 __all__ = ['custom_repr', 'CustomMeta', 'custom_repr_config']
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"

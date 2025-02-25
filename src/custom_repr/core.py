@@ -2,6 +2,7 @@ import sys
 import builtins
 from rich.text import Text
 from rich.console import Console
+from abc import ABCMeta
 
 # Global configuration
 SHOW_ATTRIBUTES = True
@@ -28,38 +29,6 @@ def custom_repr_config(attributes=True, methods=True):
 
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
-
-## 1st VERSION ##
-# Define the custom repr function
-# def custom_repr(self):
-#     """Custom representation for all classes."""
-#     # Get attributes
-#     attribute_list = []
-#     for key, value in self.__dict__.items():
-#         if isinstance(value, str):
-#             formatted_value = f'"{value}"'
-#         else:
-#             formatted_value = repr(value)
-#         attribute_string = f"{key}: {formatted_value}"
-#         attribute_list.append(attribute_string)
-    
-#     # Get methods
-#     method_list = []
-#     for key, value in type(self).__dict__.items():
-#         if callable(value) and not key.startswith('__'):
-#             method_string = f"{key}()"
-#             method_list.append(method_string)
-    
-#     # Combine attributes and methods
-#     parts = []
-#     if attribute_list:
-#         parts.append("{ " + ", ".join(attribute_list) + " }")
-#     if method_list:
-#         parts.append(" || [ " + ", ".join(method_list) + " ]")
-    
-#     result = f"{self.__class__.__name__} => {''.join(parts)}"
-#     return result
-## 1st VERSION ##
 
 
 def custom_repr(self):
@@ -127,8 +96,8 @@ def custom_repr(self):
         console.print(output)
     return capture.get().rstrip() # Remove any trailing whitespace/newline
 
- # Define a custom metaclass
-class CustomMeta(type):
+# Update the CustomMeta class to handle ABC
+class CustomMeta(ABCMeta):
     def __new__(cls, name, bases, dct):
         if '__repr__' not in dct:
             dct['__repr__'] = custom_repr
@@ -150,19 +119,19 @@ def is_user_module(module_name, module_file):
 
 # Define a custom __build_class__ function
 def custom_build_class(func, name, *args, **kwargs):
-    # If metaclass is specified anywhere, use original build
-    if 'metaclass' in kwargs or (args and any(type(base) is not type for base in args)):
-        return original_build_class(func, name, *args, **kwargs)
+    # Check if the class inherits from ABC but doesn't have a metaclass specified
+    is_abc_class = any(arg.__name__ == 'ABC' for arg in args if hasattr(arg, '__name__'))
+    has_metaclass = 'metaclass' in kwargs
     
-    # Get the calling frame
-    frame = sys._getframe(1)
-    module_name = frame.f_globals.get('__name__', '')
-    module_file = frame.f_globals.get('__file__', '')
-
-    # Only apply custom metaclass to user modules
-    if is_user_module(module_name, module_file):
+    # If it inherits from ABC and doesn't have a metaclass, use CustomMeta
+    if is_abc_class and not has_metaclass:
+        kwargs['metaclass'] = CustomMeta
+    # If metaclass is already something else, respect that
+    elif not has_metaclass and not any(type(base) is not type for base in args):
+        # For normal classes, apply CustomMeta
         kwargs['metaclass'] = CustomMeta
     
+    # Call the original build class function with our updated kwargs
     return original_build_class(func, name, *args, **kwargs)
 
 

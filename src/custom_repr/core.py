@@ -81,7 +81,7 @@ def custom_repr(self):
     
     # Only append methods if there are any
     if method_list:
-        output.append(" || [ ")
+        output.append("\n[ ")
         output.append(Text.join(Text(", "), method_list))
         output.append(" ]")
     

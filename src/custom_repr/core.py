@@ -3,6 +3,29 @@ import builtins
 from rich.text import Text
 from rich.console import Console
 
+# Global configuration
+SHOW_ATTRIBUTES = True
+SHOW_METHODS = True
+
+# Function to set global configuration
+def custom_repr_config(attributes=True, methods=True):
+    """
+    Configure the output format of custom_repr.
+    
+    Args:
+        attributes (bool): Whether to show attributes (default: True)
+        methods (bool): Whether to show methods (default: True)
+    
+    Example:
+        custom_repr_config(True, False)  # Show attributes only
+        custom_repr_config(False, True)  # Show methods only
+        custom_repr_config(True, True)   # Show both attributes and methods
+        custom_repr_config(False, False) # Show class name only
+    """
+    global SHOW_ATTRIBUTES, SHOW_METHODS
+    SHOW_ATTRIBUTES = attributes
+    SHOW_METHODS = methods
+
 # Save the original __build_class__ function
 original_build_class = builtins.__build_class__
 
@@ -45,42 +68,56 @@ def custom_repr(self):
     
     # Get attributes with colors
     attribute_list = []
-    for key, value in self.__dict__.items():
-        if isinstance(value, str):
-            formatted_value = Text(f'"{value}"', style="green")  # strings in green
-        elif isinstance(value, bool):
-            formatted_value = Text(str(value), style="cyan")  # booleans in red
-        elif isinstance(value, (int, float)):
-            formatted_value = Text(str(value), style="magenta")  # numbers in yellow
-        else:
-            formatted_value = Text(repr(value), style="white")
-        
-        key_text = Text(key, style="yellow")  # keys in cyan
-        colon_text = Text(": ", style="white")
-        attribute_string = Text.assemble(key_text, colon_text, formatted_value)
-        attribute_list.append(attribute_string)
+    if SHOW_ATTRIBUTES:  # Check if attributes should be shown
+        for key, value in self.__dict__.items():
+            if isinstance(value, str):
+                formatted_value = Text(f'"{value}"', style="green")  # strings in green
+            elif isinstance(value, bool):
+                formatted_value = Text(str(value), style="cyan")  # booleans in red
+            elif isinstance(value, (int, float)):
+                formatted_value = Text(str(value), style="magenta")  # numbers in yellow
+            else:
+                formatted_value = Text(repr(value), style="white")
+            
+            key_text = Text(key, style="yellow")  # keys in cyan
+            colon_text = Text(": ", style="white")
+            attribute_string = Text.assemble(key_text, colon_text, formatted_value)
+            attribute_list.append(attribute_string)
     
     # Get methods
     method_list = []
-    for key, value in type(self).__dict__.items():
-        if callable(value) and not key.startswith('__'):
-            method_text = Text(f"{key}()", style="magenta")  # methods in magenta
-            method_list.append(method_text)
+    if SHOW_METHODS:  # Check if methods should be shown
+        for key, value in type(self).__dict__.items():
+            if callable(value) and not key.startswith('__'):
+                method_text = Text(f"{key}()", style="magenta")  # methods in magenta
+                method_list.append(method_text)
     
     # Combine parts with colors
     class_name = Text(self.__class__.__name__, style="bold blue")
+    
+    # If attributes is False, only display the class name
+    if not SHOW_ATTRIBUTES and not SHOW_METHODS:
+        # Capture and return just the class name
+        with console.capture() as capture:
+            console.print(class_name)
+        return capture.get().rstrip()
+    
+    # Otherwise, build the full output
     arrow = Text(" => ", style="white")
     
     # Build the output
     output = Text()
     output.append(class_name)
     output.append(arrow)
-    output.append("{ ")
-    output.append(Text.join(Text(", "), attribute_list))
-    output.append(" }")
     
-    # Only append methods if there are any
-    if method_list:
+    if SHOW_ATTRIBUTES:
+        output.append("{ ")
+        if attribute_list:
+            output.append(Text.join(Text(", "), attribute_list))
+        output.append(" }")
+    
+    # Only append methods if there are any and they should be shown
+    if SHOW_METHODS and method_list:
         output.append("\n[ ")
         output.append(Text.join(Text(", "), method_list))
         output.append(" ]")
@@ -127,6 +164,7 @@ def custom_build_class(func, name, *args, **kwargs):
         kwargs['metaclass'] = CustomMeta
     
     return original_build_class(func, name, *args, **kwargs)
+
 
 # Monkey-patch __build_class__
 builtins.__build_class__ = custom_build_class

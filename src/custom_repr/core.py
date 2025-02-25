@@ -121,14 +121,20 @@ def is_user_module(module_name, module_file):
 def custom_build_class(func, name, *args, **kwargs):
     # Check if the class inherits from ABC but doesn't have a metaclass specified
     is_abc_class = any(arg.__name__ == 'ABC' for arg in args if hasattr(arg, '__name__'))
+    
+    # Check for metaclass in kwargs
     has_metaclass = 'metaclass' in kwargs
     
-    # If it inherits from ABC and doesn't have a metaclass, use CustomMeta
-    if is_abc_class and not has_metaclass:
+    # Check if metaclass is directly ABCMeta
+    is_abcmeta_metaclass = False
+    if has_metaclass:
+        is_abcmeta_metaclass = kwargs['metaclass'].__name__ == 'ABCMeta'
+    
+    # If it inherits from ABC or uses ABCMeta directly, use CustomMeta
+    if (is_abc_class or is_abcmeta_metaclass) and not (has_metaclass and not is_abcmeta_metaclass):
         kwargs['metaclass'] = CustomMeta
-    # If metaclass is already something else, respect that
+    # For normal classes with no metaclass specified
     elif not has_metaclass and not any(type(base) is not type for base in args):
-        # For normal classes, apply CustomMeta
         kwargs['metaclass'] = CustomMeta
     
     # Call the original build class function with our updated kwargs

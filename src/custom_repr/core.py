@@ -88,7 +88,7 @@ def custom_repr(self):
     # Only append methods if there are any and they should be shown
     if SHOW_METHODS and method_list:
         # Use pipe separator instead of newline
-        output.append(" | | [ ")
+        output.append(" || [ ")
         output.append(Text.join(Text(", "), method_list))
         output.append(" ]")
     
